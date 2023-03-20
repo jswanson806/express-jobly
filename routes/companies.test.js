@@ -96,6 +96,66 @@ describe("GET /companies", function () {
     });
   });
 
+  test("works with maxEmployees query param", async function () {
+    const resp = await request(app).get("/companies").query({ maxEmployees: 1 });
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c1",
+              name: "C1",
+              description: "Desc1",
+              numEmployees: 1,
+              logoUrl: "http://c1.img",
+            }
+          ],
+    });
+  });
+
+  test("works with minEmployees query param", async function () {
+    const resp = await request(app).get("/companies").query({ minEmployees: 2 });
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c2",
+              name: "C2",
+              description: "Desc2",
+              numEmployees: 2,
+              logoUrl: "http://c2.img",
+            },
+            {
+              handle: "c3",
+              name: "C3",
+              description: "Desc3",
+              numEmployees: 3,
+              logoUrl: "http://c3.img",
+            }
+          ],
+    });
+  });
+
+  test("works with queryParams for name", async function () {
+    const resp = await request(app).get("/companies").query({ name: "1" });
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c1",
+              name: "C1",
+              description: "Desc1",
+              numEmployees: 1,
+              logoUrl: "http://c1.img",
+            }
+          ],
+    });
+  });
+
+  test("fails: test BadRequestError", async function () {
+    const resp = await request(app).get("/companies").query({ minEmployees: 2, maxEmployees: 1 });
+    expect(resp.statusCode).toEqual(400);
+  });
+
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
     // thus making it hard to test that the error-handler works with it. This
