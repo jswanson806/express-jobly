@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { BadRequestError, NotFoundError } = require("../expressError");
+const { BadRequestError, NotFoundError, ExpressError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
 /** Related functions for companies. */
@@ -45,11 +45,29 @@ class Company {
   }
 
   /** Find all companies.
-   *
+   * 
+   * Accepts optional query parameters {name, minEmployees, maxEmployees}
+   * 
+   * Filters results based on query parameters
+   * 
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+   * 
    * */
 
-  static async findAll() {
+
+  static async findAll(queryParams) {
+    const filters = queryParams;
+    console.log(filters);
+    
+    // check query for both minEmployees and maxEmployees
+    if(filters && 'minEmployees' in filters && 'maxEmployees' in filters){
+      // throw error if minEmployees > maxEmployees
+      const { minEmployees, maxEmployees } = filters;
+      if(Number(minEmployees) > Number(maxEmployees)) {
+        throw new BadRequestError("minEmployees cannot exceed maxEmployees", 400);
+      }
+    }
+    // query the db for all companies
     const companiesRes = await db.query(
           `SELECT handle,
                   name,
@@ -58,8 +76,31 @@ class Company {
                   logo_url AS "logoUrl"
            FROM companies
            ORDER BY name`);
-    return companiesRes.rows;
+
+    // filter results based on queryParams
+    const filteredCompanies = companiesRes.rows.filter(company => {
+      let isValid = true;
+      for (const key in filters) {
+        // key is "name"
+        if(key === "name"){
+          // filter out companies whose name does not include substring from filters, case-insensitive
+          isValid = isValid && company[key].toLowerCase().includes(filters[key].toLowerCase());
+          // key is "minEmployees"
+        } else if(key === "minEmployees") {
+          // filter out companies with less than "minEmployees"
+          isValid = isValid && company.numEmployees >= filters[key];
+          // key is "maxEmployees"
+        } else if(key === "maxEmployees"){
+          // filter out companies with more than "maxEmployees"
+          isValid = isValid && company.numEmployees <= filters[key];
+        }
+      }
+      return isValid;
+    });
+
+    return filteredCompanies;
   }
+  
 
   /** Given a company handle, return data about company.
    *
