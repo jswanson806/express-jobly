@@ -6,7 +6,8 @@ const {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
-  ensureUserMatch
+  ensureUserMatch,
+  ensureAuthorized
 } = require("./auth");
 
 
@@ -82,46 +83,46 @@ describe("ensureLoggedIn", function () {
 });
 
 
-describe("ensureAdmin works", function () {
-  test("works", function () {
+describe("ensureAuthorized works", function () {
+  test("works for admin", function () {
     expect.assertions(1);
-    const req = {};
-    const res = { locals: { user: { username: "test", is_admin: true } } };
+    const req = {params: { username: "test" }};
+    const res = { locals: { user: { username: "test1", isAdmin: true } } };
     const next = function (err) {
       expect(err).toBeFalsy();
     };
-    ensureAdmin(req, res, next);
+    ensureAuthorized(req, res, next);
   });
 
   test("unauth if not admin", function () {
     expect.assertions(1);
-    const req = {};
-    const res = { locals: { user: { username: "test", is_admin: false } } };
+    const req = {params: { username: "test" }};
+    const res = { locals: { user: { username: "test1", isAdmin: false } } };
     const next = function (err) {
       expect(err instanceof UnauthorizedError).toBeTruthy();
     };
-    ensureAdmin(req, res, next);
+    ensureAuthorized(req, res, next);
   });
 });
 
-describe("ensureUserMatch works", function () {
+describe("ensureAuthorized works for matching user", function () {
   test("works", function () {
     expect.assertions(1);
-    const req =  { params: { username: "test" } };
-    const res = { locals: { user: { username: "test", is_admin: true } } };
+    const req = { params: { username: "test" } };
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
     const next = function (err) {
       expect(err).toBeFalsy();
     };
-    ensureUserMatch(req, res, next);
+    ensureAuthorized(req, res, next);
   });
 
-  test("unauth if not user", function () {
+  test("unauth if not matching user", function () {
     expect.assertions(1);
     const req = { params: { username: "test1" } };
-    const res = { locals: { user: { userName: "test", is_admin: false } } };
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
     const next = function (err) {
       expect(err instanceof UnauthorizedError).toBeTruthy();
     };
-    ensureUserMatch(req, res, next);
+    ensureAuthorized(req, res, next);
   });
 });

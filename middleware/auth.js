@@ -42,39 +42,24 @@ function ensureLoggedIn(req, res, next) {
   }
 }
 
-/** Middleware to use when they must be a match for the username.
- *
- * If not, raises Unauthorized.
- */
 
 
-// check the username from the query string against the username of the logged in user
-function ensureUserMatch(req, res, next) {
-  try{
-      if(req.params.username !== res.locals.user.username){
-        throw new UnauthorizedError();
-      }
-      return next();
-    
-  } catch (err) {
-    return next(err);
-  }
-}
-
-/** Middleware to use when they must be an admin
+/** Middleware to use when they must be either an admin or the matching user
  * 
  * If not, raises Unauthorized
 */
 
 
-
-function ensureAdmin(req, res, next) {
+function ensureAuthorized(req, res, next) {
   try {
-    if (res.locals.user.isAdmin === false){
-      throw new UnauthorizedError();
+
+    if(res.locals.user.isAdmin !== true){
+      if (req.params.username !== res.locals.user.username){
+        throw new UnauthorizedError();
+      }
     }
     return next();
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 }
@@ -82,6 +67,5 @@ function ensureAdmin(req, res, next) {
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
-  ensureAdmin,
-  ensureUserMatch
+  ensureAuthorized,
 };
