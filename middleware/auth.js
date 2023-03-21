@@ -42,19 +42,16 @@ function ensureLoggedIn(req, res, next) {
   }
 }
 
-/** Middleware to use when they must be an admin.
+/** Middleware to use when they must be a match for the username.
  *
  * If not, raises Unauthorized.
  */
 
 
-// TESTING NEEDED
+// check the username from the query string against the username of the logged in user
 function ensureUserMatch(req, res, next) {
   try{
-  console.log("I AM IN THE FUNCTION")
-    
-      if(req.params.username !== res.locals.user.userName){
-        console.log("USERNAME DOESNT MATCH")
+      if(req.params.username !== res.locals.user.username){
         throw new UnauthorizedError();
       }
       return next();
@@ -64,10 +61,16 @@ function ensureUserMatch(req, res, next) {
   }
 }
 
+/** Middleware to use when they must be an admin
+ * 
+ * If not, raises Unauthorized
+*/
+
+
 
 function ensureAdmin(req, res, next) {
   try {
-    if (res.locals.user.isAdmin === false || res.locals.user.is_admin === false){
+    if (res.locals.user.isAdmin === false){
       throw new UnauthorizedError();
     }
     return next();
