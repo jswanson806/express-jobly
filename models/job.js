@@ -4,7 +4,7 @@ const db = require("../db")
 const { BadRequestError, NotFoundError, ExpressError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
-/** Related functions for companies. */
+/** Related functions for jobs. */
 
 class Job {
   /** Create a job (from data), update db, return new job data.
@@ -48,14 +48,14 @@ class Job {
 
   static async findAll(queryParams) {
     const filters = queryParams;
-    console.log("TYPE ", filters)
+
 
     // query the db for all companies
     const jobsRes = await db.query(`SELECT title, salary, equity, company_handle FROM jobs`);
     console.log(jobsRes.rows);
 
     if(typeof filters !== "undefined"){
-      console.log("FILTERS")
+
     // filter results based on queryParams
     const filteredJobs = jobsRes.rows.filter(job => {
       let isValid = true;
@@ -69,48 +69,48 @@ class Job {
           // filter out jobs with less than "minSalary"
           isValid = isValid && job.salary >= filters[key];
           // key is "hasEquity"
-        } else if(key === "hasEquity" && job[key] === true){
+        } else if(key === "hasEquity"){
           // filter out jobs without equity
-          isValid = isValid && job[key] < 0;
+          isValid = isValid && Number(job.equity) > 0;
         }
       }
       return isValid;
     });
-    console.log("FILTERED JOBS: ", filteredJobs);
+
     return filteredJobs;
   } else {
-    console.log("JOBS", jobsRes);
+
     return jobsRes;
   }
 
 }
   
 
-  // /** Given a company handle, return data about company.
+  // /** Given a job handle, return data about company.
   //  *
-  //  * Returns { handle, name, description, numEmployees, logoUrl, jobs }
+  //  * Returns { title, salary, equity, company_handle }
   //  *   where jobs is [{ id, title, salary, equity, companyHandle }, ...]
   //  *
   //  * Throws NotFoundError if not found.
   //  **/
 
-  // static async get(handle) {
-  //   const companyRes = await db.query(
-  //         `SELECT handle,
-  //                 name,
-  //                 description,
-  //                 num_employees AS "numEmployees",
-  //                 logo_url AS "logoUrl"
-  //          FROM companies
-  //          WHERE handle = $1`,
-  //       [handle]);
+  static async get(id) {
+    const jobRes = await db.query(
+          `SELECT id,
+                  title,
+                  salary,
+                  equity,
+                  company_handle
+           FROM jobs
+           WHERE id = $1`,
+        [id]);
 
-  //   const company = companyRes.rows[0];
+    const job = jobRes.rows[0];
 
-  //   if (!company) throw new NotFoundError(`No company: ${handle}`);
+    if (!job) throw new NotFoundError(`No company: ${id}`);
 
-  //   return company;
-  // }
+    return job;
+  }
 
   // /** Update company data with `data`.
   //  *
