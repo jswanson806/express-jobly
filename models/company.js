@@ -57,7 +57,6 @@ class Company {
 
   static async findAll(queryParams) {
     const filters = queryParams;
-    console.log(filters);
     
     // check query for both minEmployees and maxEmployees
     if(filters && 'minEmployees' in filters && 'maxEmployees' in filters){
