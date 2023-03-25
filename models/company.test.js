@@ -3,6 +3,7 @@
 const db = require("../db.js");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const Company = require("./company.js");
+const Job = require("./job.js");
 const {
   commonBeforeAll,
   commonBeforeEach,
@@ -163,13 +164,28 @@ describe("findAll", function () {
 
 describe("get", function () {
   test("works", async function () {
+    
+
     let company = await Company.get("c1");
+
+    const job = await db.query(`SELECT * FROM jobs WHERE company_handle = $1`, [company.handle]);
+    const targetJob = job.rows[0];
+
     expect(company).toEqual({
       handle: "c1",
       name: "C1",
       description: "Desc1",
       numEmployees: 1,
       logoUrl: "http://c1.img",
+      jobs: [
+        {
+          id: targetJob.id,
+          title: "j1",
+          salary: 50000,
+          equity: "0",
+          company_handle: "c1"
+        }
+      ]
     });
   });
 
