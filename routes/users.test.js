@@ -105,6 +105,37 @@ describe("POST /users", function () {
   });
 });
 
+/************************************** POST /users/:username/jobs/:id */
+
+describe("POST /users/:username/jobs/:id", function () {
+  test("works for admin", async function () {
+    const jobRes = await db.query(`SELECT id FROM jobs WHERE title='j1'`);
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${jobRes.rows[0].id}`)
+      .set("authorization",  `Bearer ${u2Token}`);
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      applied: String(jobRes.rows[0].id)
+    });
+  });
+
+  test("unauth for anon", async function () {
+    const jobRes = await db.query(`SELECT id FROM jobs WHERE title='j1'`);
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${jobRes.rows[0].id}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauth for wrong user", async function () {
+    const jobRes = await db.query(`SELECT id FROM jobs WHERE title='j1'`);
+    const resp = await request(app)
+      .post(`/users/u3/jobs/${jobRes.rows[0].id}`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+});
+
 /************************************** GET /users */
 
 describe("GET /users", function () {
