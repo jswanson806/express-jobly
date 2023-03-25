@@ -133,6 +133,15 @@ describe("findAll", function () {
 
 describe("get", function () {
   test("works", async function () {
+    const jobRes = await db.query("SELECT id FROM jobs");
+    const targetJob = jobRes.rows[0];
+
+
+    const result = await db.query(
+      `INSERT INTO applications (username, job_id)
+        VALUES ($1, $2) RETURNING username, job_id`,
+        ["u1", targetJob.id]);
+
     let user = await User.get("u1");
     expect(user).toEqual({
       username: "u1",
@@ -140,6 +149,9 @@ describe("get", function () {
       lastName: "U1L",
       email: "u1@email.com",
       isAdmin: false,
+      jobs: [
+        targetJob.id
+      ]
     });
   });
 
