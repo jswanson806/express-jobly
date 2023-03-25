@@ -148,9 +148,12 @@ class User {
 
     const jobs = jobsRes.rows;
 
-    const jobsArray = jobs.map(a => a.job_id);
+    if(jobs.length > 0){
 
-    Object.assign(user, {jobs: jobsArray})
+      const jobsArray = jobs.map(a => a.job_id);
+      
+      Object.assign(user, {jobs: jobsArray})
+    }
 
 
     return user;

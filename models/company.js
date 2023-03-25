@@ -126,13 +126,16 @@ class Company {
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
 
-    const jobResults = await db.query(`SELECT id, title, salary, equity, company_handle FROM jobs WHERE company_handle = $1`, [handle])
+    const jobResults = await db.query(`SELECT id, title, salary, equity, company_handle 
+                                        FROM jobs 
+                                        WHERE company_handle = $1`, [handle])
 
     const jobs = jobResults.rows;
+    if (jobs.length > 0){
+      const jobsArray = jobs.map(j => j);
 
-    const jobsArray = jobs.map(j => j);
-
-    Object.assign(company, {jobs: jobsArray});
+      Object.assign(company, {jobs: jobsArray});
+    }
 
     return company;
   }
