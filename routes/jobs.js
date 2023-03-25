@@ -87,8 +87,8 @@ router.get("/:id", async function (req, res, next) {
 //  *
 //  * Authorization required: login, admin
 //  */
-// ensureLoggedIn, ensureAuthorized, 
-router.patch("/:id", async function (req, res, next) {
+
+router.patch("/:id", ensureLoggedIn, ensureAuthorized, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, JobUpdateSchema);
     if (!validator.valid) {
@@ -107,8 +107,8 @@ router.patch("/:id", async function (req, res, next) {
 //  *
 //  * Authorization: login, admin
 //  */
-// ensureLoggedIn, ensureAuthorized,
-router.delete("/:id",  async function (req, res, next) {
+
+router.delete("/:id", ensureLoggedIn, ensureAuthorized, async function (req, res, next) {
   try {
     await Job.remove(req.params.id);
     return res.json({ deleted: req.params.id });
