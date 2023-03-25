@@ -27,7 +27,7 @@ describe("POST /jobs", function () {
     const newJob = {
         title: "new",
         salary: 99999,
-        equity: "0.05",
+        equity: 0.05,
         company_handle: "c1",
       };
 
@@ -38,7 +38,12 @@ describe("POST /jobs", function () {
         .set("authorization", `Bearer ${u2Token}`);
     expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual({
-      job: newJob,
+      job: {
+      title: "new",
+      salary: 99999,
+      equity: "0.05",
+      company_handle: "c1"
+    },
     });
   });
 
@@ -67,7 +72,7 @@ describe("POST /jobs", function () {
         .send({
           title: 1,
           salary: 88888,
-          equity: "0.5",
+          equity: 0.5,
           company_handle: "c1"
         })
         .set("authorization", `Bearer ${u2Token}`);
@@ -77,75 +82,69 @@ describe("POST /jobs", function () {
 
 /************************************** GET /companies */
 
-// describe("GET /companies", function () {
-//   test("ok for anon", async function () {
-//     const resp = await request(app).get("/companies");
-//     expect(resp.body).toEqual({
-//       companies:
-//           [
-//             {
-//               handle: "c1",
-//               name: "C1",
-//               description: "Desc1",
-//               numEmployees: 1,
-//               logoUrl: "http://c1.img",
-//             },
-//             {
-//               handle: "c2",
-//               name: "C2",
-//               description: "Desc2",
-//               numEmployees: 2,
-//               logoUrl: "http://c2.img",
-//             },
-//             {
-//               handle: "c3",
-//               name: "C3",
-//               description: "Desc3",
-//               numEmployees: 3,
-//               logoUrl: "http://c3.img",
-//             },
-//           ],
-//     });
-//   });
+describe("GET /jobs", function () {
+  test("ok for anon", async function () {
+    const resp = await request(app).get("/jobs");
+    expect(resp.body).toEqual({
+      jobs:
+          [
+            {
+              title: "j1",
+              salary: 50000,
+              equity:"0",
+              company_handle: "c1",
+            },
+            {
+              title: "j2",
+              salary: 75000,
+              equity: "0.5",
+              company_handle: "c2",
+            },
+            {
+              title: "j3",
+              salary: 97000,
+              equity: "0.8",
+              company_handle: "c3",
+            },
+          ],
+    });
+  });
 
-//   test("works with maxEmployees query param", async function () {
-//     const resp = await request(app).get("/companies").query({ maxEmployees: 1 });
-//     expect(resp.body).toEqual({
-//       companies:
-//           [
-//             {
-//               handle: "c1",
-//               name: "C1",
-//               description: "Desc1",
-//               numEmployees: 1,
-//               logoUrl: "http://c1.img",
-//             }
-//           ],
-//     });
-//   });
+  test("works with minSalary query param", async function () {
+    const resp = await request(app).get("/jobs").query({ minSalary: 97000 });
+    expect(resp.body).toEqual({
+      jobs:
+          [
+            {
+              title: "j3",
+              salary: 97000,
+              equity: "0.8",
+              company_handle: "c3",
+            }
+          ],
+    });
+  });
 
-//   test("works with minEmployees query param", async function () {
-//     const resp = await request(app).get("/companies").query({ minEmployees: 2 });
-//     expect(resp.body).toEqual({
-//       companies:
-//           [
-//             {
-//               handle: "c2",
-//               name: "C2",
-//               description: "Desc2",
-//               numEmployees: 2,
-//               logoUrl: "http://c2.img",
-//             },
-//             {
-//               handle: "c3",
-//               name: "C3",
-//               description: "Desc3",
-//               numEmployees: 3,
-//               logoUrl: "http://c3.img",
-//             }
-//           ],
-//     });
-//   });
+  test("works with hasEquity query param", async function () {
+    const resp = await request(app).get("/jobs").query({ hasEquity: true });
+    expect(resp.body).toEqual({
+      jobs:
+          [
+            {
+              title: "j2",
+              salary: 75000,
+              equity: "0.5",
+              company_handle: "c2",
+            },
+            {
+              title: "j3",
+              salary: 97000,
+              equity: "0.8",
+              company_handle: "c3",
+            }
+          ],
+    });
+  });
 
 //   test("works with queryParams for name", async function () {
 //     const resp = await request(app).get("/companies").query({ name: "1" });
@@ -316,4 +315,4 @@ describe("POST /jobs", function () {
 //         .set("authorization", `Bearer ${u2Token}`);
 //     expect(resp.statusCode).toEqual(404);
 //   });
-// });
+});
