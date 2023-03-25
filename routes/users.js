@@ -43,6 +43,15 @@ router.post("/", ensureLoggedIn, ensureAuthorized, async function (req, res, nex
   }
 });
 
+router.post("/:username/jobs/:id", ensureLoggedIn, ensureAuthorized, async function (req, res, next) {
+  try {
+    const application = await User.submitApplication(req.params.username, req.params.id);
+    return res.status(200).json({applied: req.params.id})
+  } catch{err} {
+    return next(err);
+  }
+})
+
 
 /** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
  *
