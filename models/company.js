@@ -116,13 +116,23 @@ class Company {
                   description,
                   num_employees AS "numEmployees",
                   logo_url AS "logoUrl"
-           FROM companies
+            FROM companies
            WHERE handle = $1`,
         [handle]);
+
+    
 
     const company = companyRes.rows[0];
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
+
+    const jobResults = await db.query(`SELECT id, title, salary, equity, company_handle FROM jobs WHERE company_handle = $1`, [handle])
+
+    const jobs = jobResults.rows;
+
+    const jobsArray = jobs.map(j => j);
+
+    Object.assign(company, {jobs: jobsArray});
 
     return company;
   }
