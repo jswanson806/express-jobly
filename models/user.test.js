@@ -209,6 +209,47 @@ describe("update", function () {
   });
 });
 
+/************************************** submitApplication */
+
+describe("submitApplication", function () {
+  test("works", async function () {
+
+    // get the target job
+    const jobRes = await db.query("SELECT id FROM jobs WHERE title = 'j1'");
+    const targetJob = jobRes.rows[0]
+
+    // pass the target username and target job_id to function
+    await User.submitApplication('u1', targetJob.id);
+    expect({applied: targetJob.id})
+
+  });
+
+  test("not found if no such user", async function () {
+
+    try {
+      // get the target job
+      const jobRes = await db.query("SELECT id FROM jobs WHERE title = 'j1'");
+      const targetJob = jobRes.rows[0]
+
+      await User.submitApplication('u9999', targetJob.id)
+    } catch(err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("not found if no such job", async function () {
+
+    try {
+      await User.submitApplication('u1', 9999)
+    } catch(err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+
+  });
+});
+
+
+
 /************************************** remove */
 
 describe("remove", function () {
