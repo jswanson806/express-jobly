@@ -118,7 +118,7 @@ class User {
   /** Given a username, return data about user.
    *
    * Returns { username, first_name, last_name, is_admin, jobs }
-   *   where jobs is { id, title, company_handle, company_name, state }
+   *   where jobs is { id }
    *
    * Throws NotFoundError if user not found.
    **/
@@ -136,8 +136,22 @@ class User {
     );
 
     const user = userRes.rows[0];
-
     if (!user) throw new NotFoundError(`No user: ${username}`);
+
+    const jobsRes = await db.query(
+      `SELECT username,
+              job_id
+        FROM applications
+        WHERE username = $1`,
+        [username]
+    );
+
+    const jobs = jobsRes.rows;
+
+    const jobsArray = jobs.map(a => a.job_id);
+
+    Object.assign(user, {jobs: jobsArray})
+
 
     return user;
   }
